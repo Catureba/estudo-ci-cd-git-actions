@@ -67,12 +67,30 @@ public class Main {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         try {
+            // Parse the birthdate string into a Date object
             Date birthdate = dateFormat.parse(birthdateStr);
-            users.add(new User(name, email, password, birthdate));
-            System.out.println("Usuário cadastrado com sucesso!");
-        } catch (ParseException var6) {
+
+            // Get the current date
+            Date currentDate = new Date();
+
+            // Calculate the age in milliseconds
+            long ageInMillis = currentDate.getTime() - birthdate.getTime();
+
+            // Convert milliseconds to years (considering 365.25 days per year)
+            double ageInYears = ageInMillis / (1000.0 * 60.0 * 60.0 * 24.0 * 365.25);
+
+            // Check if the user is at least 18 years old
+            if (ageInYears < 18) {
+                System.out.println("O usuário deve ter pelo menos 18 anos.");
+                // Do not register the user
+            } else {
+                // The user is 18 or older, proceed with registration
+                users.add(new User(name, email, password, birthdate));
+                System.out.println("Usuário cadastrado com sucesso!");
+            }
+        } catch (ParseException e) {
             System.out.println("Data de nascimento inválida. Tente novamente.");
-            cadastrarUsuario();
+            // Do not register the user
         }
 
     }
@@ -136,14 +154,25 @@ public class Main {
     private static void deletarUsuario() {
         System.out.println("Digite o email do usuário que deseja deletar:");
         String deleteEmail = scanner.nextLine();
-        User deleteUser = null;
-        Iterator var2 = users.iterator();
 
-        while(var2.hasNext()) {
-            User user = (User)var2.next();
+        // Prompt for and verify the user's password
+        System.out.println("Digite a senha do usuário:");
+        String password = scanner.nextLine();
+
+        User deleteUser = null;
+        Iterator<User> iterator = users.iterator();
+
+        while (iterator.hasNext()) {
+            User user = iterator.next();
             if (user.getEmail().equals(deleteEmail)) {
-                deleteUser = user;
-                break;
+                // Check if the provided password matches the user's password
+                if (user.getPassword().equals(password)) {
+                    deleteUser = user;
+                    break;
+                } else {
+                    System.out.println("Senha incorreta. Tente novamente.");
+                    return; // Exit the method if password is incorrect
+                }
             }
         }
 
@@ -153,8 +182,8 @@ public class Main {
         } else {
             System.out.println("Usuário não encontrado.");
         }
-
     }
+
 
     static {
         scanner = new Scanner(System.in);
